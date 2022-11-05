@@ -3,16 +3,13 @@ class BingoField:
     value = -1
     chosen = False
 
-    def __init__(self):
-        pass
-
     def __init__(self, new_value: int):
         self.value = new_value
 
     def set_value(self, new_value: int):
-        self.value = new_value
+        self.value = int(new_value)
 
-    def get_value(self):
+    def get_value(self) -> int:
         return self.value
 
     def choose(self):
@@ -33,7 +30,7 @@ def add_row(new_row: [str]) -> [BingoField]:
 def choose_number(board: [[BingoField]], number: int):
     for row in board:
         for field in row:
-            if field.get_value() == number:
+            if int(field.get_value()) == number:
                 field.choose()
 
 
@@ -52,26 +49,15 @@ def is_won(board: [[BingoField]]) -> bool:
                 cnt += 1
         if cnt == 5:
             return True
-    for i in range(5):
-        cnt = 0
-        if board[i][i].is_chosen():
-            cnt += 1
-        if cnt == 5:
-            return True
-    for i in range(5):
-        cnt = 0
-        if board[i][4 - i].is_chosen():
-            cnt += 1
-        if cnt == 5:
-            return True
+    return False
 
 
 def get_partial_score(board: [[BingoField]]) -> int:
     unmarked_sum = 0
     for row in board:
         for field in row:
-            if not field.is_chosen:
-                unmarked_sum += field.get_value()
+            if not field.is_chosen():
+                unmarked_sum += int(field.get_value())
     return unmarked_sum
 
 
@@ -80,7 +66,7 @@ def print_board(board: [[BingoField]]):
     for row in board:
         s_board += "["
         for field in row:
-            if field.is_chosen():
+            if bool(field.is_chosen()):
                 s_board += "*" + str(field.get_value()) + ","
             else:
                 s_board += str(field.get_value()) + ","
@@ -94,7 +80,7 @@ def main():
     boards = []
     boards_count = 0
 
-    with open("example_input.txt") as f:
+    with open("input.txt") as f:
         chosen_numbers = f.readline()
         chosen_values_str = chosen_numbers.split(",")
         for val in chosen_values_str:
@@ -105,7 +91,6 @@ def main():
     for i in range(boards_count):
         board = []
         for j in range(1, 6):
-            print(i * 6 + j)
             board.append(add_row(boards_read[i * 6 + j].strip("\n").split(" ")))
         boards.append(board)
 
@@ -117,15 +102,17 @@ def main():
     found_win = False
     current_number = -1
     score = 0
-    while not found_win:
+    while not found_win and current_number < len(chosen_values) - 1:
         current_number += 1
         for board in boards:
             choose_number(board, chosen_values[current_number])
         for board in boards:
+            print(print_board(board))
             if is_won(board):
                 found_win = True
                 score = get_partial_score(board) * chosen_values[current_number]
-    print("Score of the first winning board: " + score)
+
+    print("Score of the first winning board: " + str(score))
 
 
 if __name__ == "__main__":
